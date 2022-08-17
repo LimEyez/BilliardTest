@@ -35,6 +35,7 @@ class BilliardsComponent extends Component {
         this.point1 = 0;
         this.point2 = 0;
         this.click = 0;
+        
         this.buttonPush = document.getElementById('play');
 
         //массив фигур
