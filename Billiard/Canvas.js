@@ -45,7 +45,7 @@ class Canvas {
 
     //Задание силы удара и активация анимации
     push() {
-        this.calc.calcGain(this.kiy.alfa, this.kiy, this.balls.balls[0], 20)
+        this.calc.calcGain(this.kiy.alfa, this.kiy, this.balls.balls[0], 10)
         this.startPush();
 
     }

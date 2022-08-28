@@ -2,52 +2,124 @@ const PI = Math.PI;
 
 class Calc {
     constructor(R) {
-        this.R = R
+        this.R = R;
+        this.base = { x: 3 * R, y: 0 }
+
     }
 
     calcCollision(A, B, colVector) {
-        const alfa = this.calcAlfa(A.gain, colVector);
-        this.calcGainForStateBalls(alfa, A, B)
-        // console.log(alfa * 180 / PI)
-        // Object.assign(B.gain, A.gain);
-        // Object.assign(A.gain, {x: 0, y: 0})
+        // console.log(A.num, B.num)
+        const a_push = Math.abs(this.calcAlfa(this.base, A.gain));
+        const a_gave = Math.abs(this.calcAlfa(this.base, colVector));
+        let a_pushGrad = Math.abs(a_push * 180 / PI);
+        let a_gaveGrad = Math.abs(a_gave * 180 / PI);
+        let a_pushGradGain = 1;
+        let a_gaveGradGain = 1;
+        // console.log(a_pushGrad, a_gaveGrad)
+        // if (a_pushGrad > 90 || a_pushGrad < -90) {
+        //     a_pushGradGain = 90 - Math.abs(a_pushGrad - 90);
+        // };
+        // if (a_gaveGrad > 90 || a_gaveGrad < -90) {
+        //     a_gaveGradGain = 90 - Math.abs(a_gaveGrad - 90);
+        // }
 
-    }
+        const gradGainCol = Math.abs(this.calcAlfa(A.gain, colVector) * 180/PI);
 
-    calcGainForStateBalls(alfa, V1, V2) {
-        const gain = Math.abs(V1.gain.x) + Math.abs(V1.gain.y);
-        let alfa_grad = alfa * 180/PI;
-        if (alfa_grad > 90 || alfa_grad < -90) {
-            alfa_grad = (90 - (Math.abs(alfa_grad) - 90)) * (Math.abs(alfa_grad)/alfa_grad);
+        const Gain_1 = {
+            x: (Math.abs(A.gain.x) + Math.abs(A.gain.y)) * (gradGainCol / 90),
+            y: 0
+        };
+
+        const Gain_2 = {
+            x: (Math.abs(A.gain.x) + Math.abs(A.gain.y)) * ((90 - gradGainCol) / 90),
+            y: 0
+        };
+
+        // console.log(gradGainCol/90, (90 - gradGainCol)/90)
+
+        if (A.y < B.y) {//Если ведущий шар находится выше
+            B.route.y = 1;
+            A.route.y = 1;
+            if (A.x <= B.x) {   //Если ведущий шар находится левее
+                B.route.x = 1;
+                B.gain.x = Gain_2.x * Math.sin(a_gaveGrad) * B.route.x;
+                B.gain.y = -Gain_2.x * Math.cos(a_gaveGrad) * B.route.y;
+
+                A.route.x = -1;
+                A.gain.x = Gain_1.x * Math.sin(a_gaveGrad + 90) * A.route.x;
+                A.gain.y = -Gain_1.x * Math.cos(a_gaveGrad + 90) * A.route.y;
+                // console.log(Math.sin(a_gaveGrad),Gain_2.x,  B.gain)
+            }
+            else {              //Если ведущий шар находится праее
+                B.route.x = -1;
+                B.gain.x = Gain_2.x * Math.sin(a_gaveGrad) * B.route.x;
+                B.gain.y = -Gain_2.x * Math.cos(a_gaveGrad) * B.route.y;
+
+                A.route.x = 1;
+                A.gain.x = Gain_1.x * Math.sin(a_gaveGrad - 90) * A.route.x;
+                A.gain.y = -Gain_1.x * Math.cos(a_gaveGrad - 90) * A.route.y;
+            }
         }
-        const alfa2_y = (alfa_grad / 90).toFixed(2) - 0;
-        const alfa2_x = (1 - alfa2_y).toFixed(2) - 0;
+        else {          //Если ведущий шар находится ниже
+            B.route.y = -1;
+            A.route.y = -1;
+            if (A.x <= B.x) {   //Если ведущий шар находится левее
+                B.route.x = 1;
+                B.gain.x = Gain_2.x * Math.sin(a_gaveGrad) * B.route.x;
+                B.gain.y = -Gain_2.x * Math.cos(a_gaveGrad) * B.route.y;
 
-        const alfa_grad_1 = 90 - alfa_grad;
+                A.route.x = -1;
+                A.gain.x = Gain_1.x * Math.sin(a_gaveGrad + 90) * A.route.x;
+                A.gain.y = -Gain_1.x * Math.cos(a_gaveGrad + 90) * A.route.y;
+                // console.log(Gain_1, Gain_2)
+            }
+            else {              //Если ведущий шар находится праее
+                B.route.x = -1;
+                B.gain.x = Gain_2.x * Math.sin(a_gaveGrad) * B.route.x;
+                B.gain.y = -Gain_2.x * Math.cos(a_gaveGrad) * B.route.y;
 
-        const alfa1_y = (alfa_grad_1 / 90).toFixed(2) - 0;
-        const alfa1_x = (1 - alfa1_y).toFixed(2) - 0;
-
-        const gain_1 = gain * alfa2_y;
-        const gain_2 = gain * alfa2_x;
-
-
-
-        const gain_1to2 = Object.assign({}, V1.gain);
-
-        gain_1to2.x *= -1;
-        gain_1to2.y *= -1;
+                A.route.x = 1;
+                A.gain.x = Gain_1.x * Math.sin(a_gaveGrad - 90) * A.route.x;
+                A.gain.y = -Gain_1.x * Math.cos(a_gaveGrad - 90) * A.route.y;
+            }
+        }
 
 
-        V2.gain.x = (V1.gain.x * Math.cos(alfa2_x) - V1.gain.y * Math.sin(alfa2_x)) * alfa2_x * V1.route.x;
-        V2.gain.y = (-V1.gain.x * Math.sin(alfa2_y) + V1.gain.y * Math.cos(alfa2_y)) * alfa2_y * V1.route.y;
-        console.log(alfa_grad, alfa_grad_1, alfa*180/PI)
-        Object.assign(V2.route, V1.route);
-        // V1.gain.x = -(V1.gain.x * Math.cos(alfa1_x) - V1.gain.y * Math.sin(alfa1_x)) * alfa1_x;
-        // V1.gain.y = (-V1.gain.x * Math.sin(alfa1_y) + V1.gain.y * Math.cos(alfa1_y)) * alfa1_y;
+        /*
+                if (A.y > B.y) {
+        
+                    B.route.y = -1;
+                    B.gain.y = -Gain_2.x * Math.cos(a_gaveGrad) * B.route.y;
+                    console.log('y = -1')
+                }
+                else {
+                    B.route.y = 1;
+                    B.gain.y = -Gain_2.x * Math.cos(-(180 - a_gaveGrad)) * B.route.y;
+                    console.log('y = 1')
+                }
+                if (A.x > B.x) {
+                    B.route.x = -1;
+                    B.gain.x = Gain_2.x * Math.sin(a_gave) * B.route.x;
+                    console.log('x = -1')
+                }
+                else {
+                    B.route.x = 1;
+                    B.gain.x = Gain_2.x * Math.sin(a_gave) * B.route.x;
+                    console.log('x = 1')
+                } 
+                */
+
+        //СОХРАНИТЬ
+        // B.gain.x = Gain_2.x * Math.sin(a_gave) * A.route.x;
+        // B.gain.y = -Gain_2.x * Math.cos(a_gave) * A.route.y;
+
+        // console.log(B.gain)
+
+        // A.route = { x: 1, y: 1 }
+        // A.gain.x = Gain_1.x * Math.sin((a_gaveGrad - 90) * PI / 180) * A.route.x;
+        // A.gain.y = -Gain_1.x * Math.cos((a_gaveGrad - 90) * PI / 180) * A.route.y;
+
     }
-
-
 
     kiyEvent(event, ball, R) {
         const Ball = { x: 3 * R, y: 0 }
